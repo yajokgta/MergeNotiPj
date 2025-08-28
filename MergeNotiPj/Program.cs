@@ -1669,39 +1669,6 @@ namespace MergeNotiPj
 
                 if (string.IsNullOrEmpty(_SMTPTo) == true && _SMTPTestMode == "T")
                     return;
-                #region | Get SMTP Config from ContactUS 2020-04-22 by Arm |
-
-                try
-                {
-                    ServiceController serviceController = new ServiceController();
-                    CustomContactUS contactUS = serviceController.GetContactUSByConnectionString(iCustom.connectionString);
-                    Log("GetContactUSByConnectionString");
-                    if (contactUS != null)
-                    {
-                        Log("GetContactUSByConnectionString != null");
-                        if (!String.IsNullOrEmpty(contactUS.SMTPConfig))
-                        {
-                            Log("contactUS.SMTPConfig " + contactUS.SMTPConfig);
-                            List<String> listSMTPConfig = contactUS.SMTPConfig.Split(Char_Pipe).ToList();
-                            if (listSMTPConfig.Count >= 7)
-                            {
-                                tempSMTPServer = listSMTPConfig[0];
-                                tempSMTPPort = checkDataIntIsNull(listSMTPConfig[1]);
-                                tempSMTPEnableSsl = checkDataBooleanIsNull(listSMTPConfig[2]);
-                                tempSMTPUser = listSMTPConfig[3];
-                                tempSMTPPassword = listSMTPConfig[4];
-                                tempSMTPTestMode = listSMTPConfig[5];
-                                tempSMTPTo = listSMTPConfig[6];
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log($"Get SMTP Config from ContactUS : {ex.ToString()}");
-                }
-
-                #endregion
 
                 List<CustomMasterData> list_CustomMasterData =
                     new MasterDataService().GetMasterDataListInActiveEmail(new CustomMasterData { connectionString = iCustom.connectionString });

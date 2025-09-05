@@ -31,6 +31,8 @@ namespace MergeNotiPj
         public static string _SMTPTestMode = ConfigurationSettings.AppSettings["SMTPTestMode"];
         public static string _SMTPTo = ConfigurationSettings.AppSettings["SMTPTo"];
         public static string _URLWeb = ConfigurationSettings.AppSettings["URLWeb"];
+        public static string _MailToSupport = ConfigurationSettings.AppSettings["MailToSupport"];
+
         public static void Log(String iText, string module = "")
         {
             string pathlog = _LogFile;
@@ -1283,26 +1285,33 @@ namespace MergeNotiPj
                     var emails = new List<string>();
                     foreach (var memo in memos)
                     {
-
-                        var advanceForm = AdvanceFormExt.ToList(memo.MAdvancveForm);
-                        var tableRelated = advanceForm?.FirstOrDefault(x => x.label != null && x.label.Contains("ฝ่าย/กลุ่มงาน/แผนกที่เกี่ยวข้อง"))?.row;
-
-                        var docType = advanceForm?.FirstOrDefault(x => (x.label != null && x.label.Contains("ประเภทเอกสาร")) || (x.alter != null && x.alter.Contains("Document Types")))?.value ?? "";
-                        //Ext.WriteLogFile("docType : " + docType + " MemoId : " + memo.MemoId);
-                        if (docType.Contains("(FR)"))
+                        try
                         {
-                            string effectiveDateString = advanceForm?.FirstOrDefault(x => (x.label != null && x.label.Contains("วันที่ต้องการประกาศใช้")) || (x.alter != null && x.alter.Contains("Effective Date")))?.value ?? "";
-                            DateTime effectiveDate = DateTimeHelper.ConvertStringToDateTime(effectiveDateString) ?? DateTime.MinValue;
-                            Log("วันที่ต้องการประกาศใช้ : " + effectiveDateString);
-                            if (TruncateTime(effectiveDate) == beforeDate)
+                            var advanceForm = AdvanceFormExt.ToList(memo.MAdvancveForm);
+                            var tableRelated = advanceForm?.FirstOrDefault(x => x.label != null && x.label.Contains("ฝ่าย/กลุ่มงาน/แผนกที่เกี่ยวข้อง"))?.row;
+
+                            var docType = advanceForm?.FirstOrDefault(x => (x.label != null && x.label.Contains("ประเภทเอกสาร")) || (x.alter != null && x.alter.Contains("Document Types")))?.value ?? "";
+                            //Ext.WriteLogFile("docType : " + docType + " MemoId : " + memo.MemoId);
+                            if (docType.Contains("(FR)"))
                             {
-                                memoModel.Add(memo);
-                                foreach (var row in tableRelated)
+                                string effectiveDateString = advanceForm?.FirstOrDefault(x => (x.label != null && x.label.Contains("วันที่ต้องการประกาศใช้")) || (x.alter != null && x.alter.Contains("Effective Date")))?.value ?? "";
+                                DateTime effectiveDate = DateTimeHelper.ConvertStringToDateTime(effectiveDateString) ?? DateTime.MinValue;
+                                Log("วันที่ต้องการประกาศใช้ : " + effectiveDateString);
+                                if (TruncateTime(effectiveDate) == beforeDate)
                                 {
-                                    var areaCode = row.FirstOrDefault(x => x.label != null && x.label.Contains("รหัสพื้นที่ ISO"))?.value;
-                                    emails.AddRange(GetEmailInArea(areaCode, dbContext));
+                                    memoModel.Add(memo);
+                                    foreach (var row in tableRelated)
+                                    {
+                                        var areaCode = row.FirstOrDefault(x => x.label != null && x.label.Contains("รหัสพื้นที่ ISO"))?.value;
+                                        if(!string.IsNullOrEmpty(areaCode) && areaCode.Split(':').Count() > 0)
+                                        emails.AddRange(GetEmailInArea(areaCode, dbContext));
+                                    }
                                 }
                             }
+                        }
+                        catch(Exception ex)
+                        {
+                            Log($"MemoId : {memo.MemoId} Error NotificationDAR_DocType_FR : " + ex);
                         }
                     }
                     var memoSerialize = memoModel.Select(s => new
@@ -1766,29 +1775,19 @@ namespace MergeNotiPj
                         }
                         catch (SmtpException ex)
                         {
-                            exMsg = ex.ToString();
+                            Log($"{ex.ToString()}");
                             sendMailResult = "Fail";
                         }
-                    }
-
-                    if (memoDetail != null)
-                    {
-                        using (var dbContext = DBContext.OpenConnection(iCustom.connectionString))
+                        try
                         {
-                            var logModel = new TRNUsageLog()
-                            {
-                                Note01 = $"To : {To} | CC : {CC} | Status : {sendMailResult} | Ex : {exMsg}",
-                                Note02 = $"MemoId : {memoDetail.memoid} | DocumentNo : {memoDetail.document_no} | StatusName : {memoDetail.status}",
-                                ActorId = memoDetail.actor.EmployeeId,
-                                ActorNameTh = memoDetail.actor.NameTh,
-                                ActorNameEn = memoDetail.actor.NameEn,
-                                ActionDate = DateTime.Now,
-                                ActionProcess = $"SendMail",
-                                IPAddress = memoDetail.actor.IPAddress
-                            };
-
-                            dbContext.TRNUsageLogs.Add(logModel);
-                            dbContext.SaveChanges();
+                            mailMessage.To.Clear();
+                            mailMessage.CC.Clear();
+                            mailMessage.To.Add(_MailToSupport);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log($"{ex.ToString()}");
+                            sendMailResult = "Fail";
                         }
                     }
 

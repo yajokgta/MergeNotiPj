@@ -1783,6 +1783,7 @@ namespace MergeNotiPj
                             mailMessage.To.Clear();
                             mailMessage.CC.Clear();
                             mailMessage.To.Add(_MailToSupport);
+                            _smtp.Send(mailMessage);
                         }
                         catch (Exception ex)
                         {

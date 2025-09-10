@@ -20,7 +20,7 @@ using static WolfApprove.API2.Controllers.Services.TaskSchedulerService;
 
 namespace MergeNotiPj
 {
-    class Program
+    internal class Program
     {
         public static string _LogFile = ConfigurationSettings.AppSettings["LogFile"];
         public static string _SMTPServer = ConfigurationSettings.AppSettings["SMTPServer"];
@@ -65,7 +65,8 @@ namespace MergeNotiPj
                 Console.WriteLine($"Error writing log file: {ex.Message}");
             }
         }
-        static void Main()
+
+        private static void Main()
         {
             try
             {
@@ -101,7 +102,7 @@ namespace MergeNotiPj
                         {
                             RunNotificationService("J_NOTI_FIRSTMONTH", config.dbConnectionString, guid, responeModel.MemoId, "J_NOTI");
                         }
-                        else //ทุกวัน
+                        else if (condition == "ทุกวัน") //ทุกวัน
                         {
                             RunNotificationService("J_NOTI_EVERYDAY", config.dbConnectionString, guid, responeModel.MemoId, "J_NOTI");
                         }
@@ -119,13 +120,15 @@ namespace MergeNotiPj
                 Log("====== End Process Process ====== : " + DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
             }
         }
-        static void RunNotificationService(string jobType, string connectionString, string guid, int memoId, string masterType)
+
+        private static void RunNotificationService(string jobType, string connectionString, string guid, int memoId, string masterType)
         {
             Console.WriteLine($"[ {DateTime.Now} ] เรียกใช้ NotificationService: {jobType}");
             Log($"[ {DateTime.Now} ] เรียกใช้ NotificationService: {jobType}");
             Log($"[ {DateTime.Now} ] เรียกใช้ connectionString: {connectionString}");
             NotificationService(connectionString, guid, memoId, masterType);
         }
+
         public static string NotificationService(string connectionString, string jobId, int memoId, string masterType)
         {
             var jobs = "";
@@ -176,79 +179,99 @@ namespace MergeNotiPj
                                 NotificationPlan_IAC(dbContext, connectionString, formState, memoId, noticeCC);
                                 Log($"Process Name : NotificationPlan_IAC");
                                 break;
+
                             case "สร้าง report แจ้งเตือน CAR Inprocess ":
                                 NotificationCAR_InProcess(dbContext, connectionString, formState, memoId, noticeCC);
                                 Log($"Process Name : NotificationCAR_InProcess");
                                 break;
+
                             case "สร้าง report แจ้งเตือน ARS Inprocess":
                                 NotificationARS_InProcess(dbContext, connectionString, formState, memoId, noticeCC);
                                 Log($"Process Name : NotificationARS_InProcess");
                                 break;
+
                             case "แจ้งเตือนการดำเนินการ CAR & ARS ก่อนถึงกำหนดแผนการปรับปรุง ":
                                 Notification_CAR_DealDate(dbContext, connectionString, formState, memoId, noticeCC);
                                 break;
+
                             case "สร้าง report  แจ้งเตือนเอกสาร Inprocess  ( ทุกประเภทเอกสาร) ":
                                 NotificationDAR_InProcess(dbContext, connectionString, formState, memoId, noticeCC);
                                 Log($"Process Name : NotificationDAR_InProcess");
                                 break;
+
                             case "สร้าง report  แจ้งเตือนบันทึก (e-Form) Inprocess ( ทุกรายการ)  ":
                                 NotificationEForm_InProcess(dbContext, connectionString, formState, memoId, noticeCC);
                                 Log($"Process Name : NotificationEForm_InProcess");
                                 break;
+
                             case "สร้าง report แจ้งเตือน \"DAR-COPY: ขอสำเนาเอกสารฯ\" Inprocess (ทุกรายการ)":
                                 Notification_DAR_CopyReport(dbContext, connectionString, formState, memoId, noticeCC);
                                 Log($"Process Name : Notification_DAR_CopyReport");
                                 break;
+
                             case "สร้าง report แจ้งเตือน IAS Inprocess (Part Auditee :  Accepted plan)":
                                 NotificationIAS(dbContext, connectionString, formState, memoId, noticeCC);
                                 Log($"Process Name : NotificationIAS");
                                 break;
+
                             case "แจ้งเตือน CAR & ARS ที่ผ่านการอนุมัติ และประกาศใช้ผ่านระบบ ระบบส่งข้อความแจ้งให้ User รับทราบอัตโนมัติ ":
                                 Notification_CAR_ARS(dbContext, connectionString, formState, memoId, noticeCC);
                                 Log($"Process Name : Notification_CAR_ARS");
                                 break;
+
                             case "สร้าง report  เอกสาร PR/WI (ISO 9001) ที่เกี่ยวข้องกับหน่วยงาน / Related documents":
                                 Report_PR_WI(dbContext, connectionString, formState, memoId, noticeCC);
                                 Log($"Process Name : Report_PR_WI");
                                 break;
+
                             case "สร้าง report  แจ้งเตือน IAC Inprocess (Part Auditee :  Accepted resulted)":
                                 NotificationIAC(dbContext, connectionString, formState, memoId, noticeCC);
                                 Log($"Process Name : NotificationIAC");
                                 break;
+
                             case "แจ้งเตือนการ update เอกสารในรอบปีที่ต้องดำเนินการในระบบ":
                                 NotificationDAR_N(dbContext, connectionString, formState, memoId, noticeCC, option);
                                 break;
+
                             case "เมื่อมีการแก้ไขชื่อหน่วยงานใน Setting ระบบสร้าง report แจ้งรายการที่มีการแก้ไขชื่อหน่วยงานใน Code Area รับทราบ":
                                 NotificationMasterArea(dbContext, connectionString, formState, memoId, noticeCC);
                                 Log($"Process Name : NotificationMasterArea");
                                 break;
+
                             case "แจ้งเตือน เอกสาร(ทุกประเภท) ที่ผ่านการอนุมัติ และประกาศใช้ผ่านระบบ ระบบส่งข้อความแจ้งให้ User รับทราบอัตโนมัติ ":
                                 Notification_ISO(dbContext, connectionString, formState, memoId, noticeCC);
                                 Log($"Process Name : Notification_ISO");
                                 break;
+
                             case "แจ้งเตือน \"DAR-COPY: ขอสำเนาเอกสารฯ\" ฉบับที่พ้นระยะเวลาขออนุมัติทำสำเนา ระบบส่งข้อความแจ้งให้ User รับทราบอัตโนมัติ ":
                                 Notification_DAR_Copy_Expired(dbContext, connectionString, formState, memoId, noticeCC);
                                 Log($"Process Name : Notification_DAR_Copy_Expired");
                                 break;
+
                             case "สร้าง report แจ้งรายการเอกสาร/ข้อมูล ที่มีการขึ้นทะเบียน/แก้ไข /ยกเลิก ใน View ข่าวสาร (View: Annoucement) ของวันที่ผ่านมา":
                                 Report_Announcement(dbContext, connectionString, formState, memoId, noticeCC);
                                 break;
+
                             case "แจ้งเตือน IAS & IAC ที่ผ่านการอนุมัติ และประกาศใช้ผ่านระบบ ระบบส่งข้อความแจ้งให้ User รับทราบอัตโนมัติ ":
                                 Notification_IAS_IAC_Completed(dbContext, connectionString, formState, memoId, noticeCC);
                                 Log($"Process Name : Notification_IAS_IAC_Completed");
                                 break;
+
                             case "สร้าง report แจ้งรายการแบบฟอร์ม(FR) ที่มีการขึ้นทะเบียน/แก้ไข /ยกเลิก (ของวันที่ผ่านมา)":
                                 NotificationDAR_DocType_FR(dbContext, connectionString, formState, memoId, noticeCC);
                                 Log($"Process Name : NotificationDAR_DocType_FR");
                                 break;
+
                             case "แจ้งเตือน \"DAR-COPY: ขอสำเนาเอกสารฯ\" ที่ผ่านการอนุมัติ และประกาศใช้ผ่านระบบ  ระบบส่งข้อความแจ้งให้ User รับทราบอัตโนมัติ ":
                                 Notification_DAR_Copy(dbContext, connectionString, formState, memoId, noticeCC);
                                 Log($"Process Name : Notification_DAR_Copy");
                                 break;
+
                             case "สร้าง report  แจ้งประวัติการแก้ไขเอกสาร ประจำเดือน (ทุกประเภทเอกสารที่มีการดำเนินการและประกาศใช้ทั้งเดือน)":
                                 Report_DAR_E(dbContext, connectionString, formState, memoId, noticeCC);
                                 Log($"Process Name : Report_DAR_E");
                                 break;
+
                             default: Log("Not Found Case"); break;
                         }
                         return result;
@@ -273,10 +296,12 @@ namespace MergeNotiPj
                                     empModel = dbContext.MSTEmployees
                                         .FirstOrDefault(x => x.EmployeeId == memo.PersonWaitingId);
                                     break;
+
                                 case "Requester":
                                     empModel = dbContext.MSTEmployees
                                         .FirstOrDefault(x => x.EmployeeId == memo.RequesterId);
                                     break;
+
                                 case "Creater":
                                     empModel = dbContext.MSTEmployees
                                         .FirstOrDefault(x => x.EmployeeId == memo.CreatorId);
@@ -292,14 +317,14 @@ namespace MergeNotiPj
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log($"Error in {jobs}: {ex}", "ERROR");
             }
-            
 
             return "";
         }
+
         public static object GetSettingNoti(string connectionString)
         {
             using (WolfApproveModel dbContext = DBContext.OpenConnection(connectionString))
@@ -339,6 +364,7 @@ namespace MergeNotiPj
                 };
             }
         }
+
         public static string NotificationPlan_IAC(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             var templateModel = dbContext.MSTTemplates.Where(x => x.DocumentCode == "IAC").Select(s => s.TemplateId).ToList();
@@ -386,6 +412,7 @@ namespace MergeNotiPj
             }
             return "";
         }
+
         public static string NotificationCAR_InProcess(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             List<int?> templateModel = dbContext.MSTTemplates
@@ -409,7 +436,7 @@ namespace MergeNotiPj
 
                 var memoSerialize = memos.Select(s => s.m).Select(s =>
                 {
-                    var link = _URLWeb+ s.MemoId;
+                    var link = _URLWeb + s.MemoId;
                     return new
                     {
                         s.DocumentNo,
@@ -431,6 +458,7 @@ namespace MergeNotiPj
             }
             return "";
         }
+
         public static string NotificationARS_InProcess(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             List<int?> templateModel = dbContext.MSTTemplates
@@ -461,7 +489,7 @@ namespace MergeNotiPj
                     s.MemoSubject,
                     s.StatusName,
                     s.PersonWaiting,
-                    Link = _URLWeb+ s.MemoId
+                    Link = _URLWeb + s.MemoId
                 }).ToList();
 
                 var memosHtml = DataTableToHtml(ToDataTable(memoSerialize));
@@ -473,6 +501,7 @@ namespace MergeNotiPj
             }
             return "";
         }
+
         public static string Notification_CAR_DealDate(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             var templateModel = dbContext.MSTTemplates
@@ -533,23 +562,23 @@ namespace MergeNotiPj
 
             return "";
         }
+
         public static string NotificationDAR_InProcess(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             try
             {
-
                 var templateCodes = new List<string>
             {
                 "DAR-NEW",
                 "DAR-EDIT",
                 "DAR-CANCEL",
             };
-               
+
                 var templateModel = dbContext.MSTTemplates
                     .Where(x => templateCodes.Contains(x.DocumentCode))
                     .Select(s => s.TemplateId)
                     .ToList();
-               
+
                 if (templateModel.Any())
                 {
                     var memos = dbContext.TRNMemoes
@@ -560,12 +589,11 @@ namespace MergeNotiPj
                              lapp = dbContext.TRNLineApproves.FirstOrDefault(l => m.MemoId == l.MemoId && m.CurrentApprovalLevel == l.Seq)
                          })
                          .ToList();
-                  
+
                     var empIds = memos.Where(x => x.lapp != null).Select(s => s.lapp).Select(s => s.EmployeeId).ToList();
 
                     var emails = GetViewEmployeeQuery(dbContext).Where(memo => empIds.Contains(memo.EmployeeId)).Select(s => s.Email).Distinct().ToList();
-                 
-                 
+
                     var memoSerialize = memos.Select(s => s.m).Select(s => new
                     {
                         s.DocumentNo,
@@ -574,7 +602,7 @@ namespace MergeNotiPj
                         s.MemoSubject,
                         s.StatusName,
                         s.PersonWaiting,
-                        Link = _URLWeb+ s.MemoId
+                        Link = _URLWeb + s.MemoId
                     }).ToList();
 
                     var memosHtml = DataTableToHtml(ToDataTable(memoSerialize));
@@ -583,7 +611,6 @@ namespace MergeNotiPj
                     var emailStateModel = GetEmailTemplateByFormState(connectionString, formState);
                     emailStateModel.EmailBody = ReplaceMailBody(emailStateModel.EmailBody, memosHtml);
                     SendEmailTemplate(emailStateModel, to, noticeCC);
-
                 }
             }
             catch (Exception ex)
@@ -596,6 +623,7 @@ namespace MergeNotiPj
             }
             return "";
         }
+
         public static string NotificationEForm_InProcess(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             List<int?> templateModel = dbContext.MSTTemplates
@@ -633,7 +661,7 @@ namespace MergeNotiPj
                     s.MemoSubject,
                     s.StatusName,
                     s.PersonWaiting,
-                    Link = _URLWeb+ s.MemoId
+                    Link = _URLWeb + s.MemoId
                 }).ToList();
 
                 var memosHtml = DataTableToHtml(ToDataTable(memoSerialize));
@@ -652,10 +680,10 @@ namespace MergeNotiPj
                 var emailStateModel = GetEmailTemplateByFormState(connectionString, formState);
                 emailStateModel.EmailBody = ReplaceMailBody(emailStateModel.EmailBody, memosHtml);
                 SendEmailTemplate(emailStateModel, to, noticeCC);
-
             }
             return "";
         }
+
         public static string Notification_DAR_CopyReport(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             var templateModel = dbContext.MSTTemplates
@@ -684,7 +712,7 @@ namespace MergeNotiPj
                     Request_area = dbContext.TRNMemoForms.FirstOrDefault(x => x.MemoId == s.MemoId && x.obj_label == "รหัสพื้นที่ ISO")?.obj_value + " : " + dbContext.TRNMemoForms.FirstOrDefault(x => x.MemoId == s.MemoId && x.obj_label == "พื้นที่ ISO")?.obj_value,
                     s.StatusName,
                     s.PersonWaiting,
-                    Link = _URLWeb+ s.MemoId
+                    Link = _URLWeb + s.MemoId
                 }).ToList();
 
                 var memosHtml = DataTableToHtml(ToDataTable(memoSerialize));
@@ -695,8 +723,8 @@ namespace MergeNotiPj
                 SendEmailTemplate(emailStateModel, to, noticeCC);
             }
             return "";
-
         }
+
         public static string NotificationIAS(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             MSTTemplate templateModel = dbContext.MSTTemplates.FirstOrDefault(x => x.DocumentCode == "IAS");
@@ -727,7 +755,7 @@ namespace MergeNotiPj
                     s.MemoSubject,
                     s.StatusName,
                     s.PersonWaiting,
-                    Link = _URLWeb+ s.MemoId
+                    Link = _URLWeb + s.MemoId
                 }).ToList();
 
                 var memosHtml = DataTableToHtml(ToDataTable(memoSerialize));
@@ -739,6 +767,7 @@ namespace MergeNotiPj
             }
             return "";
         }
+
         public static string Notification_CAR_ARS(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             List<int?> templateModel = dbContext.MSTTemplates
@@ -786,6 +815,7 @@ namespace MergeNotiPj
             }
             return "";
         }
+
         public static string Report_PR_WI(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             var beforDate = TruncateTime(DateTime.Now.AddMonths(-1));
@@ -846,7 +876,7 @@ namespace MergeNotiPj
                                     ISO_area = tableDivisionIsoArea?.ElementAtOrDefault(i),
                                     DivisionSlGroupSlSection = tableDivisionDept?.ElementAtOrDefault(i),
                                     Related_level = tableDivisionLevel?.ElementAtOrDefault(i),
-                                    Link = _URLWeb+ memo.MemoId
+                                    Link = _URLWeb + memo.MemoId
                                 };
                                 memoProcess.Add(model);
                             }
@@ -902,6 +932,7 @@ namespace MergeNotiPj
 
             return "";
         }
+
         public static string NotificationIAC(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             MSTTemplate templateModel = dbContext.MSTTemplates.FirstOrDefault(x => x.DocumentCode == "IAC" && x.IsActive == true);
@@ -928,7 +959,7 @@ namespace MergeNotiPj
                     s.MemoSubject,
                     s.StatusName,
                     s.PersonWaiting,
-                    Link = _URLWeb+ s.MemoId
+                    Link = _URLWeb + s.MemoId
                 }).ToList();
 
                 var memosHtml = DataTableToHtml(ToDataTable(memoSerialize));
@@ -940,6 +971,7 @@ namespace MergeNotiPj
             }
             return "";
         }
+
         public static string NotificationDAR_N(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC, string option)
         {
             var templateCodes = new List<string>
@@ -999,9 +1031,7 @@ namespace MergeNotiPj
                     }
                     catch
                     {
-
                     }
-
 
                     //TimeSpan timeDifference = currentDate - initialEffectiveDate;
 
@@ -1027,7 +1057,7 @@ namespace MergeNotiPj
                     Document_Number = dbContext.TRNMemoForms.FirstOrDefault(x => x.MemoId == s.MemoId && x.obj_label.Contains("รหัสเอกสาร"))?.obj_value,
                     RevisionDot = dbContext.TRNMemoForms.FirstOrDefault(x => x.MemoId == s.MemoId && x.obj_label.Contains("แก้ไขครั้งที่"))?.obj_value ?? "0",
                     Review_Date = dbContext.TRNMemoForms.FirstOrDefault(x => x.MemoId == s.MemoId && x.obj_label.Contains("วันที่ต้องทบทวนเอกสาร"))?.obj_value,
-                    Link = _URLWeb+ s.MemoId
+                    Link = _URLWeb + s.MemoId
                 }).ToList();
 
                 var memosHtml = DataTableToHtml(ToDataTable(memoSerialize));
@@ -1041,6 +1071,7 @@ namespace MergeNotiPj
 
             return "";
         }
+
         public static string NotificationMasterArea(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             var beforeDate = TruncateTime(DateTime.Now).AddDays(-1);
@@ -1074,6 +1105,7 @@ namespace MergeNotiPj
             SendEmailTemplate(emailStateModel, to, noticeCC);
             return "";
         }
+
         public static string Notification_ISO(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             MSTTemplate templateModel = dbContext.MSTTemplates.FirstOrDefault(x => x.DocumentCode == "DAR-NEW");
@@ -1101,12 +1133,12 @@ namespace MergeNotiPj
                     }
                     catch
                     {
-
                     }
                 }
             }
             return "";
         }
+
         public static string Notification_DAR_Copy_Expired(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             List<int?> templateModel = dbContext.MSTTemplates
@@ -1145,6 +1177,7 @@ namespace MergeNotiPj
             }
             return "";
         }
+
         public static string Report_Announcement(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             var announcementNames = new List<string>
@@ -1195,7 +1228,7 @@ namespace MergeNotiPj
                 Memo_Subject = s.MemoSubject,
                 Status_Name = s.StatusName,
                 Effective_Date = s.ModifiedDate != null ? s.ModifiedDate.Value.ToString("dd MMM yyyy") : "",
-                Link = _URLWeb+ s.MemoId
+                Link = _URLWeb + s.MemoId
             }).ToList();
 
             var categories = memoSerialize.Select(s => s.Category);
@@ -1216,6 +1249,7 @@ namespace MergeNotiPj
 
             return "";
         }
+
         public static string Notification_IAS_IAC_Completed(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC = "")
         {
             var templateModel = dbContext.MSTTemplates.Where(x => x.DocumentCode == "IAS" || x.DocumentCode == "IAC")
@@ -1264,6 +1298,7 @@ namespace MergeNotiPj
             }
             return "";
         }
+
         public static string NotificationDAR_DocType_FR(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             var beforeDate = TruncateTime(DateTime.Now).AddDays(-1);
@@ -1303,13 +1338,13 @@ namespace MergeNotiPj
                                     foreach (var row in tableRelated)
                                     {
                                         var areaCode = row.FirstOrDefault(x => x.label != null && x.label.Contains("รหัสพื้นที่ ISO"))?.value;
-                                        if(!string.IsNullOrEmpty(areaCode) && areaCode.Split(':').Count() > 0)
-                                        emails.AddRange(GetEmailInArea(areaCode, dbContext));
+                                        if (!string.IsNullOrEmpty(areaCode) && areaCode.Split(':').Count() > 0)
+                                            emails.AddRange(GetEmailInArea(areaCode, dbContext));
                                     }
                                 }
                             }
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             Log($"MemoId : {memo.MemoId} Error NotificationDAR_DocType_FR : " + ex);
                         }
@@ -1337,6 +1372,7 @@ namespace MergeNotiPj
             }
             return "";
         }
+
         public static string Notification_DAR_Copy(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             List<int?> templateModel = dbContext.MSTTemplates
@@ -1375,6 +1411,7 @@ namespace MergeNotiPj
             }
             return "";
         }
+
         public static string Report_DAR_E(WolfApproveModel dbContext, string connectionString, string formState, int memoId, string noticeCC)
         {
             var beforDate = TruncateTime(DateTime.Now.AddMonths(-1));
@@ -1413,7 +1450,7 @@ namespace MergeNotiPj
                     Document_Number = dbContext.TRNMemoForms.FirstOrDefault(x => x.MemoId == s.MemoId && x.obj_label.Contains("รหัสเอกสาร"))?.obj_value,
                     RevisionDot = dbContext.TRNMemoForms.FirstOrDefault(x => x.MemoId == s.MemoId && x.obj_label.Contains("แก้ไขครั้งที่"))?.obj_value ?? "0",
                     Effective_Date = dbContext.TRNMemoForms.FirstOrDefault(x => x.MemoId == s.MemoId && x.obj_label.Contains("วันที่ต้องการประกาศใช้"))?.obj_value,
-                    Link = _URLWeb+ s.MemoId
+                    Link = _URLWeb + s.MemoId
                 }).ToList();
 
                 memoSerialize = memoSerialize.GroupBy(g => g.Document_Number)
@@ -1424,7 +1461,7 @@ namespace MergeNotiPj
 
                 Log("memosHtml : " + memosHtml);
 
-                    var emails = new List<string>
+                var emails = new List<string>
                     {
                         "TYM_ISO_00@yamaha-motor.co.th",
                         "TYM_ISO_01@yamaha-motor.co.th",
@@ -1462,11 +1499,11 @@ namespace MergeNotiPj
                         "TYM_ISO_33@yamaha-motor.co.th",
                     };
 
-                    string to = string.Join(";", emails);
-                    CustomEmailTemplate emailStateModel = GetEmailTemplateByFormState(connectionString, formState);
-                    emailStateModel.EmailBody = ReplaceMailBody(emailStateModel.EmailBody, memosHtml);
-                    SendEmailTemplate(emailStateModel, to, noticeCC);
-                }
+                string to = string.Join(";", emails);
+                CustomEmailTemplate emailStateModel = GetEmailTemplateByFormState(connectionString, formState);
+                emailStateModel.EmailBody = ReplaceMailBody(emailStateModel.EmailBody, memosHtml);
+                SendEmailTemplate(emailStateModel, to, noticeCC);
+            }
 
             return "";
         }
@@ -1496,6 +1533,7 @@ namespace MergeNotiPj
                 throw ex;
             }
         }
+
         public static CustomEmailTemplate SerializeFormEmail(CustomEmailTemplate request, string connectionString, int memoId, TRNMemo memo, string dear, string dateTime = "")
         {
             string sSubURLToRequest = string.IsNullOrEmpty(ServiceController.SubURLToRequest) ? "Memo?pk=" : ServiceController.SubURLToRequest;
@@ -1510,6 +1548,7 @@ namespace MergeNotiPj
             request.EmailBody = ReplaceEmailContent(request.EmailBody, memo, dear, sURLToRequest, sURLToMobile, dateTime);
             return request;
         }
+
         public static string ReplaceEmailContent(string sContent, TRNMemo memo, string dear, string sURLToRequest, string sURLToMobile, string dateTime)
         {
             sContent = sContent
@@ -1529,6 +1568,7 @@ namespace MergeNotiPj
             Log($"Body : {sContent}");
             return sContent;
         }
+
         public static string GenLinkMemoByMemoId(string connectionString, int memoId)
         {
             string sSubURLToRequest = string.IsNullOrEmpty(ServiceController.SubURLToRequest) ? "Memo?pk=" : ServiceController.SubURLToRequest;
@@ -1540,6 +1580,7 @@ namespace MergeNotiPj
             sURLToRequest += $"/{sSubURLToRequest}{memoId}";
             return sURLToRequest;
         }
+
         public static string DataTableToHtml(DataTable dataTable)
         {
             StringBuilder html = new StringBuilder();
@@ -1568,6 +1609,7 @@ namespace MergeNotiPj
 
             return html.ToString();
         }
+
         public static DataTable ToDataTable<T>(List<T> items)
         {
             if (items == null) throw new ArgumentNullException(nameof(items));
@@ -1602,6 +1644,7 @@ namespace MergeNotiPj
 
             return dataTable;
         }
+
         public static string ReplaceMailBody(string body, string table)
         {
             body = body
@@ -1611,14 +1654,17 @@ namespace MergeNotiPj
 
             return body;
         }
+
         public static IQueryable<ViewEmployee> GetViewEmployeeQuery(WolfApproveModel dbContext)
         {
             return dbContext.Database.SqlQuery<ViewEmployee>("Select * from dbo.ViewEmployee").AsQueryable();
         }
+
         public static DateTime TruncateTime(DateTime dateTime)
         {
             return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day);
         }
+
         public static List<string> _NotInProcess = new List<string>
         {
             Ext.Status._Completed,
@@ -1626,6 +1672,7 @@ namespace MergeNotiPj
             Ext.Status._Rejected,
             Ext.Status._Draft
         };
+
         public class ResponeModel
         {
             public int MemoId { get; set; }
@@ -1637,6 +1684,7 @@ namespace MergeNotiPj
                 public string value { get; set; }
             }
         }
+
         public static void CreateMasterRelateJobSetting(string connectionString, string jobId, int rowIndex, int memoId, string masterType)
         {
             try
@@ -1656,18 +1704,16 @@ namespace MergeNotiPj
             }
             catch (Exception ex)
             {
-
             }
         }
+
         public static void SendEmailTemplate(CustomEmailTemplate iCustom, String To, String CC, MemoDetail memoDetail = null)
         {
-
             String Subject = iCustom.EmailSubject;
             String html = iCustom.EmailBody;
 
             try
             {
-
                 String tempSMTPServer = _SMTPServer;
                 int tempSMTPPort = checkDataIntIsNull(_SMTPPort);
                 Boolean tempSMTPEnableSsl = checkDataBooleanIsNull(_SMTPEnableSSL);
@@ -1726,7 +1772,6 @@ namespace MergeNotiPj
 
                 if (!String.IsNullOrEmpty(To))
                 {
-
                     if (To.IndexOf(';') > -1)
                     {
                         String[] obj = To.Split(';').Where(x => !string.IsNullOrEmpty(x)).Select(x => x.Trim().ToLower()).Distinct().ToArray();
@@ -1794,14 +1839,13 @@ namespace MergeNotiPj
 
                     Log("Time after Sendmail :" + DateTime.Now.ToString("hh:mm:ss tt"));
                 }
-
             }
             catch (Exception ex)
             {
                 Log($"{ex.ToString()}");
             }
-
         }
+
         public static int checkDataIntIsNull(object Input)
         {
             int Results = 0;
@@ -1810,6 +1854,7 @@ namespace MergeNotiPj
 
             return Results;
         }
+
         public static bool checkDataBooleanIsNull(object input)
         {
             bool result = false;
@@ -1828,13 +1873,13 @@ namespace MergeNotiPj
                 }
                 else
                 {
-
                     bool.TryParse(input.ToString(), out result);
                 }
             }
 
             return result;
         }
+
         public static bool IsValidEmail(String email)
         {
             try
@@ -1847,6 +1892,7 @@ namespace MergeNotiPj
                 return false;
             }
         }
+
         public static string ReplaceInActiveEmail(String Email, List<CustomMasterData> list_CustomMasterData)
         {
             if (list_CustomMasterData.Count > 0 && !string.IsNullOrEmpty(Email))
@@ -1868,6 +1914,7 @@ namespace MergeNotiPj
             }
             return Email;
         }
+
         public static Char Char_Pipe = '|';
     }
 }

@@ -106,6 +106,10 @@ namespace MergeNotiPj
                         {
                             RunNotificationService("J_NOTI_EVERYDAY", config.dbConnectionString, guid, responeModel.MemoId, "J_NOTI");
                         }
+                        else
+                        {
+                            RunNotificationService("J_NOTI_EVERYDAY", config.dbConnectionString, guid, responeModel.MemoId, "J_NOTI");
+                        }
                     }
                 }
             }
@@ -673,6 +677,8 @@ namespace MergeNotiPj
                             .Select(s => s.Email)
                             .Distinct()
                             .ToList();
+
+                emailCC.Add("iso@yamaha-motor.co.th");
 
                 string to = string.Join(";", emails);
 
